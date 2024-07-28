@@ -1,0 +1,145 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Task;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+
+class TaskController extends Controller
+{
+    // task list
+    public function list(Request $request)
+    {
+        if(Auth::user()->role == 1)
+        {
+            $tasks = Task::latest()->get();
+        }
+        else
+        {
+            $tasks = Task::where('assigned_to', Auth::id())->where('accepted_status', 1)->latest()->get();
+        }
+
+        return view('task.task-list', [
+            'tasks' => $tasks
+        ]);
+    }
+
+    // pending task
+    public function pending()
+    {
+        $tasks = Task::where('assigned_to', Auth::id())->where('accepted_status', 0)->latest()->get();
+
+        return view('task.task-pending', [
+            'tasks' => $tasks
+        ]);
+    }
+
+    // create
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'title' => 'required',
+            'description' => 'nullable',
+            'assigned_to' => 'required|exists:users,id',
+            'category_id' => 'required|exists:categories,id',
+            'deadline' => 'required|date',
+            'uploaded_file' => 'nullable|mimes:png,jpg,jpeg'
+        ]);
+
+        if($validator->fails())
+        {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $task = new Task();
+        $task->title = $request->title;
+        $task->description = $request->description;
+        $task->assigned_to = $request->assigned_to;
+        $task->category_id = $request->category_id;
+        $task->deadline = Carbon::parse($request->deadline);
+        
+        if($request->hasFile('uploaded_file'))
+        {
+            $filename = $request->file('uploaded_file')->hashName();
+            $filePath = 'uploads/task/' . $filename;
+            $request->file('uploaded_file')->storeAs('public/' . $filePath);
+            $task->file = $filePath;
+        }
+        $task->save();
+
+        return redirect()->back()->with(['message' => 'Task Created']);
+    }
+
+
+    // task inner page
+    public function edit($id)
+    {
+        $task = Task::findOrFail($id);
+
+        return view('task.task-edit', compact('task'));
+    }
+
+    // update task
+    public function update(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'title' => 'required',
+            'description' => 'nullable',
+            'assigned_to' => 'required|exists:users,id',
+            'category_id' => 'required|exists:categories,id',
+            'deadline' => 'required|date',
+            'uploaded_file' => 'nullable|mimes:png,jpg,jpeg',
+            'accepted_status' => 'nullable|in:0,1',
+            'status' => 'nullable|in:0,1'
+        ]);
+
+        if($validator->fails())
+        {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $task = Task::findOrFail($id);
+
+        $data = [
+            'title' => $request->title,
+            'description' => $request->description,
+            'assigned_to' => $request->assigned_to,
+            'category_id' => $request->category_id,
+            'deadline' => Carbon::parse($request->deadline),
+            'accepted_status' => $request->accepted_status,
+            'status' => $request->status
+        ];
+
+        if($request->hasFile('uploaded_file'))
+        {
+            if($task->file)
+            {
+                Storage::delete('public/' . $task->file);
+            }
+            $filename = $request->file('uploaded_file')->hashName();
+            $filePath = 'uploads/task/' . $filename;
+            $request->file('uploaded_file')->storeAs('public/' . $filePath);
+            $data['file'] = $filePath;
+        }
+        else
+        {
+            $data['file'] = $task->file;
+        }
+        $task->update($data);
+
+        return redirect()->route('task.list')->with(['message' => 'Task updated']);
+    }
+
+    // delete
+    public function delete($id)
+    {
+        Task::findOrFail($id)->delete();
+
+        return redirect()->back()->with(['message' => 'Task Deleted']);
+
+    }
+}
