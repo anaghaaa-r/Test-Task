@@ -32,8 +32,10 @@
                             <td>{{ Carbon\Carbon::parse($task->deadline)->format('d F Y') }}</td>
                             <td>
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" role="switch" id="status-change">
-                                    <p class="text-small task-status">{{ status($task->status) }}</p>
+                                    <input class="form-check-input change-status" type="checkbox" role="switch"
+                                        id="status-change-{{ $task->id }}" data-task-id="{{ $task->id }}"
+                                        @checked($task->status)>
+                                    <p class="text-small task-status">{{ $task->status ? 'Completed' : 'Incomplete' }}</p>
                                 </div>
                             </td>
 
@@ -49,4 +51,43 @@
 @endsection
 
 @push('scripts')
+    <script>
+        $(document).ready(function() {
+
+            $('.change-status').on('change', function() {
+
+                var taskId = $(this).data('task-id');
+                var status = $(this).is(':checked') ? 1 : 0;
+                var textElement = $(this).closest('div').find('.task-status');
+
+                console.log(status);
+
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+
+                $.ajax({
+
+                    url: '{{ url('task/status') }}/' + taskId,
+                    type: 'POST',
+                    data: {
+                        status: status
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            textElement.text(status ? 'Completed' : 'Incomplete')
+                        }
+                    },
+                    error: function(xhr) {
+                        console.log('error')
+                    }
+
+                });
+
+            });
+
+        });
+    </script>
 @endpush

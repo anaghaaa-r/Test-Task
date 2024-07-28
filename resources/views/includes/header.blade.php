@@ -35,7 +35,7 @@
                 
                 @if (Auth::user()->role == 0)
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('task.users') }}">Tasks</a>
+                    <a class="nav-link" href="{{ route('task.users') }}">Task List</a>
                 </li>
                 @endif
 

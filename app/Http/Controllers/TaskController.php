@@ -127,4 +127,20 @@ class TaskController extends Controller
 
         return redirect()->back()->with(['message' => 'Task Deleted']);
     }
+
+    // update task status
+    public function status(Request $request, $id)
+    {
+        $task = Task::findOrFail($id);
+
+        $task->status = $request->status;
+
+        $task->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Task status updated',
+            'status' =>  $task->status,
+        ], 200);
+    }
 }

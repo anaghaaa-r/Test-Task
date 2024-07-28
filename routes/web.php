@@ -80,18 +80,16 @@ Route::middleware('auth')->group(function () {
 
         // delete task
         Route::delete('/task/delete/{id}', [TaskController::class, 'delete'])->name('task.delete');
-
     });
 
 
     // for authenticated users
     Route::middleware('user')->group(function () {
 
-    //    task by user
-    Route::get('/task/user', [TaskController::class, 'userTasks'])->name('task.users');
+        //    task by user
+        Route::get('/task/user', [TaskController::class, 'userTasks'])->name('task.users');
 
+        // task status
+        Route::post('/task/status/{id}', [TaskController::class, 'status'])->name('task.status');
     });
-
-
 });
-
