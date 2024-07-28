@@ -79,23 +79,9 @@
             </div>
 
             <div class="mb-3">
-                <label>Accepted Status</label>
-                <select name="accepted_status" class="form-select">
-                    <option value="" selected>Select Accepted Status</option>
-
-                        <option value="0" {{ old('accepted_status', $task->accepted_status) == 0 ? 'selected' : '' }}>Waiting for Acceptance</option>
-                        <option value="1" {{ old('accepted_status', $task->accepted_status) == 1 ? 'selected' : '' }}>Accepted</option>
-                    
-                </select>
-                @error('accepted_status')
-                    <div class="form-text text-danger">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="mb-3">
                 <label>Status</label>
                 <select name="status" class="form-select">
-                    <option value="" selected>Select Accepted Status</option>
+                    <option value="" selected>Select Status</option>
 
                         <option value="0" {{ old('status', $task->status) == 0 ? 'selected' : '' }}>Incomplete</option>
                         <option value="1" {{ old('status', $task->status) == 1 ? 'selected' : '' }}>Completed</option>

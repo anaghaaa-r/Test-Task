@@ -87,8 +87,8 @@ Route::middleware('auth')->group(function () {
     // for authenticated users
     Route::middleware('user')->group(function () {
 
-        // pending tasks user
-        Route::get('/task/pending', [TaskController::class, 'pending'])->name('task.pending');
+    //    task by user
+    Route::get('/task/user', [TaskController::class, 'userTasks'])->name('task.users');
 
     });
 

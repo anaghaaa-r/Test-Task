@@ -17,7 +17,6 @@ class Task extends Model
         'description',
         'deadline',
         'file',
-        'accepted_status',
         'status'  
     ];
 

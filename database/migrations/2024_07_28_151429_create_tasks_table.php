@@ -21,7 +21,6 @@ return new class extends Migration
             $table->foreignId('category_id')->nullable()->constrained('categories')->cascadeOnDelete();
             $table->date('deadline')->nullable();
             $table->string('file')->nullable();
-            $table->integer('accepted_status')->comment('0 => not accepted, 1 => accepted')->default(0);
             $table->integer('status')->comment('0 => not completed, 1 => completed')->default(0);
             $table->softDeletes();
             $table->timestamps();

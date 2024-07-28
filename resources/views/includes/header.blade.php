@@ -35,11 +35,7 @@
                 
                 @if (Auth::user()->role == 0)
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('task.list') }}">Accepted Tasks</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('task.pending') }}">Pending Tasks</a>
+                    <a class="nav-link" href="{{ route('task.users') }}">Tasks</a>
                 </li>
                 @endif
 

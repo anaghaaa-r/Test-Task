@@ -12,16 +12,6 @@ function getRole($index)
 }
 
 
-function acceptance($index)
-{
-    $status = [
-        0 => 'Waiting to accept',
-        1 => 'Accepted'
-    ];
-
-    return $status[$index];
-}
-
 function status($index)
 {
     $status = [

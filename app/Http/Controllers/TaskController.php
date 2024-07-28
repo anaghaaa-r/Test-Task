@@ -14,26 +14,21 @@ class TaskController extends Controller
     // task list
     public function list(Request $request)
     {
-        if(Auth::user()->role == 1)
-        {
-            $tasks = Task::latest()->get();
-        }
-        else
-        {
-            $tasks = Task::where('assigned_to', Auth::id())->where('accepted_status', 1)->latest()->get();
-        }
+        $tasks = Task::with('assignedTo', 'category')->latest()->get();
+
 
         return view('task.task-list', [
             'tasks' => $tasks
         ]);
     }
 
-    // pending task
-    public function pending()
+    // accepted tasks
+    public function userTasks()
     {
-        $tasks = Task::where('assigned_to', Auth::id())->where('accepted_status', 0)->latest()->get();
+        $tasks = Task::where('assigned_to', Auth::id())->latest()->get();
 
-        return view('task.task-pending', [
+
+        return view('task.task-users', [
             'tasks' => $tasks
         ]);
     }
@@ -50,8 +45,7 @@ class TaskController extends Controller
             'uploaded_file' => 'nullable|mimes:png,jpg,jpeg'
         ]);
 
-        if($validator->fails())
-        {
+        if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
@@ -61,9 +55,8 @@ class TaskController extends Controller
         $task->assigned_to = $request->assigned_to;
         $task->category_id = $request->category_id;
         $task->deadline = Carbon::parse($request->deadline);
-        
-        if($request->hasFile('uploaded_file'))
-        {
+
+        if ($request->hasFile('uploaded_file')) {
             $filename = $request->file('uploaded_file')->hashName();
             $filePath = 'uploads/task/' . $filename;
             $request->file('uploaded_file')->storeAs('public/' . $filePath);
@@ -93,12 +86,10 @@ class TaskController extends Controller
             'category_id' => 'required|exists:categories,id',
             'deadline' => 'required|date',
             'uploaded_file' => 'nullable|mimes:png,jpg,jpeg',
-            'accepted_status' => 'nullable|in:0,1',
             'status' => 'nullable|in:0,1'
         ]);
 
-        if($validator->fails())
-        {
+        if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
@@ -110,23 +101,18 @@ class TaskController extends Controller
             'assigned_to' => $request->assigned_to,
             'category_id' => $request->category_id,
             'deadline' => Carbon::parse($request->deadline),
-            'accepted_status' => $request->accepted_status,
             'status' => $request->status
         ];
 
-        if($request->hasFile('uploaded_file'))
-        {
-            if($task->file)
-            {
+        if ($request->hasFile('uploaded_file')) {
+            if ($task->file) {
                 Storage::delete('public/' . $task->file);
             }
             $filename = $request->file('uploaded_file')->hashName();
             $filePath = 'uploads/task/' . $filename;
             $request->file('uploaded_file')->storeAs('public/' . $filePath);
             $data['file'] = $filePath;
-        }
-        else
-        {
+        } else {
             $data['file'] = $task->file;
         }
         $task->update($data);
@@ -140,6 +126,5 @@ class TaskController extends Controller
         Task::findOrFail($id)->delete();
 
         return redirect()->back()->with(['message' => 'Task Deleted']);
-
     }
 }
