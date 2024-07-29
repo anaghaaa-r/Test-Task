@@ -25,9 +25,9 @@ Route::get('/', function () {
 
 
 // // register
-// Route::view('/register', 'auth.register')->name('register');
+Route::view('/register', 'auth.register')->name('register');
 
-// Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
+Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
 
 
 // login
@@ -39,6 +39,8 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 // authenticated
 
 Route::middleware('auth')->group(function () {
+
+    Route::post('/reset/password', [AuthController::class, 'resetPassword'])->name('reset.password');
 
     // logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

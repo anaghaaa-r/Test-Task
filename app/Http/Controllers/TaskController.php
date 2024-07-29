@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
+use App\Models\User;
+use App\Notifications\SendMailNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -63,6 +66,11 @@ class TaskController extends Controller
             $task->file = $filePath;
         }
         $task->save();
+
+        $user = User::findOrFail($request->assigned_to);
+
+        Notification::route('mail', $user->email)->notify(new SendMailNotification($task));
+
 
         return redirect()->back()->with(['message' => 'Task Created']);
     }
