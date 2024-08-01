@@ -48,8 +48,7 @@
 
             <div class="mb-3">
                 <label>Assign To</label>
-                <select name="assigned_to" class="form-select">
-                    <option value="" selected>Select a User</option>
+                <select name="assigned_to[]" class="form-select user-select" multiple>
 
                     @foreach ($users as $user)
                         <option value="{{ $user->id }}" {{ old('assigned_to') == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
@@ -79,3 +78,14 @@
         </form>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        $(document).ready(function() {
+            $('.user-select').select2({
+                placeholder: "Select Users",
+                allowClear: true
+            });
+        });
+    </script>
+@endpush

@@ -42,7 +42,8 @@ class TaskController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'required',
             'description' => 'nullable',
-            'assigned_to' => 'required|exists:users,id',
+            'assigned_to' => 'required|array',
+            'assigned_to.*' => 'exists:users,id',
             'category_id' => 'required|exists:categories,id',
             'deadline' => 'required|date',
             'uploaded_file' => 'nullable|mimes:png,jpg,jpeg'
@@ -52,10 +53,12 @@ class TaskController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
+        dd($request->assigned_to);
+
         $task = new Task();
         $task->title = $request->title;
         $task->description = $request->description;
-        $task->assigned_to = $request->assigned_to;
+        $task->assigned_to = json_encode($request->assigned_to);
         $task->category_id = $request->category_id;
         $task->deadline = Carbon::parse($request->deadline);
 
@@ -67,9 +70,12 @@ class TaskController extends Controller
         }
         $task->save();
 
-        $user = User::findOrFail($request->assigned_to);
+        $assignedUsers = User::whereIn('id', $request->assigned_to)->get();
+        foreach ($assignedUsers as $user) {
+            Notification::route('mail', $user->email)
+                ->notify(new SendMailNotification($task));
+        }
 
-        Notification::route('mail', $user->email)->notify(new SendMailNotification($task));
 
 
         return redirect()->back()->with(['message' => 'Task Created']);
